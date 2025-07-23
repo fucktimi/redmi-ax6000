@@ -59,62 +59,41 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: Load custom feeds
-      run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Update feeds
       run: |
          cd openwrt
          ./scripts/feeds update -a 
-         git clone -b master --single-branch https://github.com/immortalwrt/packages.git packages_master
-         rm -rf ./feeds/packages/lang/golang
-         mv ./packages_master/lang/golang ./feeds/packages/lang
-         rm -rf ./packages_master
 
 
-
-    - name: Install feeds
-      run: |
-        cd openwrt && ./scripts/feeds install -a
-        rm -rf feeds/luci/applications/luci-app-passwall/
-        rm -rf feeds/packages/net/xray-core/
-        rm -rf feeds/packages/net/xray-plugin/
-        rm -rf feeds/packages/net/chinadns-ng/
-        rm -rf feeds/packages/net/sing-box/
-        rm -rf feeds/packages/net/hysteria/
-        rm -rf feeds/packages/net/shadowsocksr-libev/
-        git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
-        git clone https://github.com/xiaorouji/openwrt-passwall-packages package/luci-app-passwall-packages
-        git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
-
-    - name: Update Golang
-      run: |
-          cd openwrt
-          rm -rf feeds/packages/lang/golang
-          git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
-          rm -rf feeds/luci/applications/luci-app-alist
-          rm -rf feeds/packages/net/alist
-          git clone https://github.com/sbwml/luci-app-alist package/alist
-
-
-
+ 
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P1_SH   
+
+    - name: Install feeds
+      run: |
+        cd openwrt && ./scripts/feeds install -a
+        
+         
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
 
-#    - name: Start SSH via tmate
-#      uses: P3TERX/ssh2actions@main
-
-    
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     - name: Download package
       id: package
@@ -130,11 +109,12 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
+        make -j$(nproc) || make -j8 || make -j8 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
 
     - name: Check space usage
       if: (!cancelled())
@@ -168,18 +148,18 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
-        touch release.txt
+        touch cmcc-rax3000m-PASSWALL-adguard-smartDNS.txt
         [ ${UPLOAD_GOFILE} = true && ${{ steps.gofile.outputs.url }} ] && echo "🔗 [GoFile](${{ steps.gofile.outputs.url }})" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
-      uses: softprops/action-gh-release@master
+      uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUBB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
-        body_path: release.txt
+        body_path: cmcc-rax3000m-PASSWALL-adguard-smartDNS.txt
         files: ${{ env.FIRMWARE }}/*
 
     - name: Delete workflow runs
@@ -192,7 +172,7 @@ jobs:
       uses: dev-drprasad/delete-older-releases@master
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        keep_latest: 3
+        keep_latest: 12
         delete_tags: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUBB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
