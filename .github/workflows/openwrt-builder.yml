@@ -81,12 +81,20 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a 
+      run: |
+          cd openwrt && ./scripts/feeds update -a 
+          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
 #        git clone -b master --single-branch https://github.com/immortalwrt/packages.git packages_master
 #         rm -rf ./feeds/packages/lang/golang
 #         mv ./packages_master/lang/golang ./feeds/packages/lang
 #         rm -rf ./packages_master
          
+
+
+    - name: Start SSH via tmate
+      uses: P3TERX/ssh2actions@main
+
+
 
 
     - name: Install feeds
@@ -102,7 +110,7 @@ jobs:
           cd openwrt
           rm -rf feeds/packages/lang/golang
           git clone https://github.com/sbwml/packages_lang_golang -b 25.x feeds/packages/lang/golang
-          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
+
 
 
 
@@ -115,8 +123,8 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
 
-    - name: Start SSH via tmate
-      uses: P3TERX/ssh2actions@main
+#    - name: Start SSH via tmate
+#      uses: P3TERX/ssh2actions@main
 
     
 
