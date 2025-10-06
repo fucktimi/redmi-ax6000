@@ -19,8 +19,8 @@ on:
     types: started
 
 env:
-  REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
-  REPO_BRANCH: openwrt-21.02
+  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6
+  REPO_BRANCH: openwrt-24.10-6.6
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -59,7 +59,7 @@ jobs:
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
         sudo docker image prune --all --force
         sudo -E apt-get -qq update
-        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.eu.org/init_build_environment.sh)'
+        sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
         sudo -E apt-get -qq install libfuse-dev
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
@@ -90,8 +90,9 @@ jobs:
 
 
     - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a && git clone https://github.com/OpenListTeam/OpenList-OpenWRT package/openlist
-        git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
+      run: |
+          cd openwrt && ./scripts/feeds install -a && git clone https://github.com/OpenListTeam/OpenList-OpenWRT package/openlist
+          git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 #        git clone https://github.com/xiaorouji/openwrt-passwall-packages package/luci-app-passwall-packages
         
@@ -101,6 +102,7 @@ jobs:
           cd openwrt
           rm -rf feeds/packages/lang/golang
           git clone https://github.com/sbwml/packages_lang_golang -b 25.x feeds/packages/lang/golang
+          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
 
 
 
@@ -113,8 +115,8 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
 
-#    - name: Start SSH via tmate
-#      uses: P3TERX/ssh2actions@main
+    - name: Start SSH via tmate
+      uses: P3TERX/ssh2actions@main
 
     
 
