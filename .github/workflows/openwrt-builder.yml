@@ -91,7 +91,7 @@ jobs:
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a && git clone https://github.com/OpenListTeam/OpenList-OpenWRT package/openlist
-#        git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
+        git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 #        git clone https://github.com/xiaorouji/openwrt-passwall-packages package/luci-app-passwall-packages
         
