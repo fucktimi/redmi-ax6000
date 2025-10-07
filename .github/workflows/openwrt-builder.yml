@@ -86,7 +86,7 @@ jobs:
     - name: Update feeds
       run: |
           cd openwrt && ./scripts/feeds update -a 
-#          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
+          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
 #        git clone -b master --single-branch https://github.com/immortalwrt/packages.git packages_master
 #         rm -rf ./feeds/packages/lang/golang
 #         mv ./packages_master/lang/golang ./feeds/packages/lang
@@ -94,8 +94,8 @@ jobs:
          
 
 
-    - name: Start SSH via tmate
-      uses: P3TERX/ssh2actions@main
+#    - name: Start SSH via tmate
+#      uses: P3TERX/ssh2actions@main
 
 
 
