@@ -39,16 +39,6 @@ jobs:
       run: |
         echo -e "Total CPU cores\t: $(nproc)"
         cat /proc/cpuinfo | grep 'model name'
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@master
-      with:
-        swap-size-mb: 1024
-        temp-reserve-mb: 512
-        root-reserve-mb: 4608
-        remove-dotnet: 'true'
-        remove-android: 'true'
-        remove-haskell: 'true'
-        remove-codeql: 'true'
     - name: Checkout
       uses: actions/checkout@main
 
@@ -66,15 +56,15 @@ jobs:
         sudo -E apt-get -qq install libfuse-dev
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /home/runner/work/redmi-ax6000/redmi-ax6000/workdir
-        sudo chown $USER:$GROUPS /home/runner/work/redmi-ax6000/redmi-ax6000/workdir
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
 
     - name: Clone source code
-      working-directory: /home/runner/work/redmi-ax6000/redmi-ax6000/workdir
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /home/runner/work/redmi-ax6000/redmi-ax6000/workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Load custom feeds
       run: |
@@ -112,7 +102,7 @@ jobs:
       run: |
           cd openwrt
           rm -rf feeds/packages/lang/golang
-          git clone https://github.com/sbwml/packages_lang_golang -b 25.x feeds/packages/lang/golang
+          git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 
 
 
