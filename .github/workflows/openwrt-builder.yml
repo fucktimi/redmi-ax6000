@@ -76,11 +76,6 @@ jobs:
     - name: Update feeds
       run: |
           cd openwrt && ./scripts/feeds update -a 
-#          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
-#        git clone -b master --single-branch https://github.com/immortalwrt/packages.git packages_master
-#         rm -rf ./feeds/packages/lang/golang
-#         mv ./packages_master/lang/golang ./feeds/packages/lang
-#         rm -rf ./packages_master
          
 
 
@@ -93,7 +88,8 @@ jobs:
     - name: Install feeds
       run: |
           cd openwrt && ./scripts/feeds install -a && git clone https://github.com/OpenListTeam/OpenList-OpenWRT package/openlist
-#         git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
+          sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
+          git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 #        git clone https://github.com/xiaorouji/openwrt-passwall-packages package/luci-app-passwall-packages
         
@@ -116,8 +112,8 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
 
-#    - name: Start SSH via tmate
-#      uses: P3TERX/ssh2actions@main
+    - name: Start SSH via tmate
+      uses: P3TERX/ssh2actions@main
 
     
 
